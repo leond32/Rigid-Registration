@@ -1,0 +1,68 @@
+# Ignore operating system files
+.DS_Store
+Thumbs.db
+
+# Ignore general IDE/project files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Ignore node_modules directory
+node_modules/
+
+# Ignore log files
+*.log
+
+# Ignore build directories
+dist/
+build/
+out/
+
+# Ignore Python-specific files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.env
+*.venv
+env/
+venv/
+instance/
+.pytest_cache/
+
+# Ignore virtual environment folders
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Ignore coverage reports
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Ignore temporary files created by editors
+*~
+
+# Ignore database files
+*.sqlite3
+
+# Ignore environment variable files
+.env
+.env.*
+
+# Ignore other sensitive files
+*.pem
+*.key
+*.crt
+
+# Ignore Conda directory
+.conda/
