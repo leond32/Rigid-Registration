@@ -3,6 +3,32 @@
 # -> Creates a deformation field
 
 import numpy as np
+from scipy.ndimage import convolve
+
+def smooth_segmentation_map(segmentation_map, kernel_size=3):
+    """
+    Smooth the segmentation map so that a pixel/voxel becomes 1 if the values around it are 1.
+    
+    Parameters:
+        segmentation_map (np.array): The input binary segmentation map of any dimensionality.
+        kernel_size (int): The size of the smoothing kernel. Must be an odd number.
+    
+    Returns:
+        np.array: The smoothed segmentation map.
+    """
+    # Create a smoothing kernel with the same dimensionality as the segmentation map
+    kernel_shape = (kernel_size,) * segmentation_map.ndim
+    kernel = np.ones(kernel_shape, dtype=int)
+    
+    # Apply convolution
+    convolved_map = convolve(segmentation_map, kernel, mode='constant', cval=0.0)
+    
+    # Threshold the convolved map to create the smoothed segmentation map
+    threshold = np.prod(kernel_shape) // 2
+    smoothed_map = (convolved_map >= threshold).astype(int)
+    
+    return smoothed_map
+
 
 def rotation_matrix_from_angles(angles):
     dimensions = len(angles)
