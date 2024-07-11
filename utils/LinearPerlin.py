@@ -62,27 +62,40 @@ def linear_transformation_map(segmentation_map, use_random_seed=False, random_se
     # get the maximum translation of a pixel
     max_translation = np.array(segmentation_map.shape).T/max_translation_ratio
 
-    # calculate the translation 
-    translation = (np.random.rand(dim)-0.5)*2 #values between -1 and 1, dim variable
-    T = translation * max_translation #scale it, shape [dim]
+    # create a T and R matrix for each of the segmented regions
+    unique_values = np.unique(segmentation_map)
+    transformation_dict = {}
 
-    # get a rotation matrix
-    rotation_angles = np.random.rand(dim) * 2 * np.pi #angle for each dimension
-    R = rotation_matrix_from_angles(rotation_angles)
+    for value in unique_values:
+        if value != 0:  # Assuming 0 is the background and doesn't need transformation
+            # Create translation vector T
+            # calculate the translation 
+            translation = (np.random.rand(dim)-0.5)*2 #values between -1 and 1, dim variable
+            T = translation * max_translation #scale it, shape [dim]
 
+            # get a rotation matrix
+            rotation_angles = np.random.rand(dim) * 2 * np.pi #angle for each dimension
+            R = rotation_matrix_from_angles(rotation_angles)
+
+            # Store in dictionary
+            transformation_dict[value] = {'T': T, 'R': R}
+
+
+
+    # create the new segmentation map
     new_segmentation_map = np.zeros(segmentation_map.shape)
 
     for idx in np.ndindex(segmentation_map.shape):
 
         #if the segmentation map has the correct index, apply the trafo
-        if segmentation_map[idx] == 1.0:
+        if segmentation_map[idx] != 0.0:
             new_idx = np.array(idx) - np.array(segmentation_map.shape)/2
-            new_idx = new_idx.dot(R)
+            new_idx = new_idx.dot(transformation_dict[segmentation_map[idx]]['R'])
             new_idx = new_idx + np.array(segmentation_map.shape)/2
-            new_idx = new_idx + T
+            new_idx = new_idx + transformation_dict[segmentation_map[idx]]['T']
             new_idx = np.rint(new_idx).astype(int)
             is_within_bounds = all(0 <= i < d for i, d in zip(new_idx, new_segmentation_map.shape))
             if is_within_bounds:
-                new_segmentation_map[tuple(new_idx)] = 1
+                new_segmentation_map[tuple(new_idx)] = segmentation_map[idx]
 
     return new_segmentation_map
