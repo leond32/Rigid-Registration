@@ -1,0 +1,9 @@
+numpy
+scipy
+notebook
+py-vox-io
+matplotlib
+plotly
+ipywidgets
+TPTBox
+nibabel
