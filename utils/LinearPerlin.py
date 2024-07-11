@@ -19,7 +19,7 @@ def rotation_matrix_from_angles(angles):
     
     return R
 
-def LinearTransformationMap(segmentation_map, use_random_seed=False, random_seed=0, max_translation_ratio = 10):
+def linear_transformation_map(segmentation_map, use_random_seed=False, random_seed=0, max_translation_ratio=10):
     """ Linearly Transforms the Objects inside the Segmentation Map. 
         - Inputs - 
         segmentation_map : the segmentation map as a numpy array of shape [x,y]
