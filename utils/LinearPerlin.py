@@ -36,7 +36,7 @@ def linear_transformation_map(segmentation_map, use_random_seed=False, random_se
     
     if use_random_seed:
         np.random.seed(random_seed)
-        
+
     #get the dimension 
     dim = segmentation_map.ndim
 
@@ -57,10 +57,11 @@ def linear_transformation_map(segmentation_map, use_random_seed=False, random_se
 
         #if the segmentation map has the correct index, apply the trafo
         if segmentation_map[idx] == 1.0:
-            new_idx = np.array(idx) + T
+            new_idx = np.array(idx) - np.array(segmentation_map.shape)/2
             new_idx = new_idx.dot(R)
             new_idx = new_idx + np.array(segmentation_map.shape)/2
-            new_idx = np.floor(new_idx).astype(int)
+            new_idx = new_idx + T
+            new_idx = np.rint(new_idx).astype(int)
             is_within_bounds = all(0 <= i < d for i, d in zip(new_idx, new_segmentation_map.shape))
             if is_within_bounds:
                 new_segmentation_map[tuple(new_idx)] = 1
