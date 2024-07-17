@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.ndimage import label
 
-def label_connected_components(segmentation_map):
+def label_connected_components(segmentation_map:np.ndarray)->tuple[np.ndarray,np.ndarray]:
     """
     Label connected components in the segmentation map and set the values
     of the pixels that are part of this component to a certain value.

@@ -38,19 +38,25 @@ def rotation_matrix_from_angles(angles):
     
     return R
 
-def linear_transformation_map(segmentation_map, use_random_seed=False, random_seed=0, max_translation_ratio=10):
-    """ Linearly Transforms the Objects inside the Segmentation Map. 
-        - Inputs - 
-        segmentation_map : the segmentation map as a numpy array of shape [x,y]
-
-        - Optional Inputs -
-        use_random_seed : use a random seed for reproducibility, default False
-        random_seed : choose other random seed than 0, default 0
-        max_translation_ratio : what fraction of the max dimension size should the translation be at max
-
-        - Outputs -
-        new_segmentation_map : the new segmentation map for training
-        deformation_field : the deformation field of the points
+def linear_transformation_map(segmentation_map: np.ndarray, centroids: np.ndarray, 
+                              use_random_seed: bool = False, random_seed: int = 0, 
+                              max_translation_ratio: float = 10.0, 
+                              max_rotation_angle: float = 0.0) -> tuple[np.ndarray, np.ndarray]:
+    """Linearly Transforms the Objects inside the Segmentation Map.
+    
+    Parameters:
+    segmentation_map (np.ndarray): The segmentation map as a numpy array of shape [x,y].
+    centroids (np.ndarray): Array of centroid coordinates for the objects in the segmentation map.
+    use_random_seed (bool, optional): Use a random seed for reproducibility. Default is False.
+    random_seed (int, optional): Random seed value if use_random_seed is True. Default is 0.
+    max_translation_ratio (float, optional): Maximum translation ratio as a fraction of the maximum dimension size. 
+                                            Default is 10.0.
+    max_rotation_angle (float, optional): Maximum rotation angle in degrees. Default is 0.0.
+    
+    Returns:
+    tuple: 
+        new_segmentation_map (np.ndarray): The new segmentation map for training.
+        deformation_field (np.ndarray): The deformation field of the points.
     """
     
     if use_random_seed:
@@ -89,9 +95,9 @@ def linear_transformation_map(segmentation_map, use_random_seed=False, random_se
 
         #if the segmentation map has the correct index, apply the trafo
         if segmentation_map[idx] != 0.0:
-            new_idx = np.array(idx) - np.array(segmentation_map.shape)/2
+            new_idx = np.array(idx) - centroids[segmentation_map[idx]]
             new_idx = new_idx.dot(transformation_dict[segmentation_map[idx]]['R'])
-            new_idx = new_idx + np.array(segmentation_map.shape)/2
+            new_idx = new_idx + centroids[segmentation_map[idx]]
             new_idx = new_idx + transformation_dict[segmentation_map[idx]]['T']
             new_idx = np.rint(new_idx).astype(int)
             is_within_bounds = all(0 <= i < d for i, d in zip(new_idx, new_segmentation_map.shape))
