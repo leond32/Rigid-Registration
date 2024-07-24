@@ -1,0 +1,12 @@
+segmentation_map,centroids = label_connected_components(segmentation_map)
+segmentation_map_all = color_pixels_based_on_distance(segmentation_map,100)
+perlin_2_d = ...
+new_segmentation_map,deformation_field = linear_transformation_map(segmentation_map_all, centroids,use_random_seed=True)
+mask = invert_array(segmentation_map)
+masked_field = smooth_deformation * mask[:,:,np.newaxis]
+#scale to same as field above
+masked_field = masked_field * np.max(deformation_field)
+distance_map = distance_transform_edt(mask == 0)
+perlin_scaled = perlin_2_d * distance_map[:,:,np.newaxis] * mask[:,:,np.newaxis] * 0.001
+td_distance = np.stack((distance_map,distance_map),axis=-1)
+final_deformation_field =  np.exp(-td_distance/20)*deformation_field + perlin_scaled

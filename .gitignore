@@ -67,4 +67,3 @@ coverage.xml
 # Ignore Conda directory
 .conda/
 
-tests/
