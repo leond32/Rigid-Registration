@@ -1,1 +1,0 @@
-# A function to loop over the dataset and load the spinal data and the 

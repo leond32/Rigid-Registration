@@ -194,14 +194,42 @@ def linear_transformation_map(segmentation_map: np.ndarray, centroids: np.ndarra
 
     return new_segmentation_map, deformation_field
 
+def scale_perlin_by_distance(perlin_2d,mask):
+    distance = distance_transform_edt(mask != 0)
+    scaled_perlin = perlin_2d*mask[:,:,np.newaxis]*distance[:,:,np.newaxis]*0.001
+    return scaled_perlin
+
 def create_linear_deformation_field(segmentation_map: np.ndarray,distance: int):
+    """
+    This function applies all the steps necessary to create the final deformation field. 
+    The returned deformation field is for the whole image. The mask indicates where the segmented objects are, 
+    and the segmentation_deformation_field is the deformation field to just change the segmentation map.
+    The distance parameter determines how far away from the segmented parts the pixels should be treated as rigid bodies.
+
+    Parameters:
+    segmentation_map (np.ndarray): The input segmentation map where different objects are labeled.
+    distance (int): The distance from the segmented parts within which pixels should be treated as rigid bodies.
+
+    Returns:
+    tuple: 
+        final_deformation_field (np.ndarray): The deformation field applied to the whole image.
+        mask (np.ndarray): A binary mask indicating the locations of the segmented objects.
+        segmentation_deformation_field (np.ndarray): The deformation field applied to the segmented parts.
+    """
+
+    #first label all the components in the segmentation map
     segmentation_map,centroids = label_connected_components(segmentation_map)
+    #create a segmentation map with pixels colored that are around the rigid objects for later smooth transition from linear to perlin
     segmentation_map_all = color_pixels_based_on_distance(segmentation_map,distance)
+    #now linearly deform these objects
     _,deformation_field = linear_transformation_map(segmentation_map_all, centroids,use_random_seed=True)
     mask = (segmentation_map != 0).astype(int)
     segmentation_deformation_field = deformation_field*mask[:,:,np.newaxis]
+    #smooth the field
     deformation_field = smooth_transitions(deformation_field,6)
-    distance_map = distance_transform_edt(mask != 0)
+    distance_map = distance_transform_edt(mask == 0)
     td_distance = np.stack((distance_map,distance_map),axis=-1)
+    #make the deformation "weaker", the farther you are away from true rigid bodies
     final_deformation_field =  np.exp(-td_distance*5/distance)*deformation_field 
+    mask = (mask == 0)
     return final_deformation_field,mask,segmentation_deformation_field
